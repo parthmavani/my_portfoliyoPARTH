@@ -1,11 +1,39 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import NavBar from './components/NavBar';
 import Home from './components/Home';
-import Projects from './components/Projects';
-import Contact from './components/Contact';
-import NotFound from './components/NotFound';
 import PostgresLogo from './components/PostgresLogo';
+
+// ── Lazy-loaded route components (code splitting) ──
+const Projects = lazy(() => import('./components/Projects'));
+const Contact  = lazy(() => import('./components/Contact'));
+const NotFound = lazy(() => import('./components/NotFound'));
+
+// ── Fallback UI shown while a chunk is loading ──
+const PageLoader = () => (
+  <div style={{
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '60vh',
+    gap: '16px',
+    fontFamily: 'Inter, sans-serif'
+  }}>
+    <div style={{
+      width: '48px',
+      height: '48px',
+      border: '4px solid #e2e8f0',
+      borderTop: '4px solid #6366f1',
+      borderRadius: '50%',
+      animation: 'spin 0.8s linear infinite'
+    }} />
+    <p style={{ color: '#6366f1', fontWeight: 600, fontSize: '1rem' }}>
+      Loading page...
+    </p>
+    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+  </div>
+);
 /* ─── Data passed as props to components ─── */
 const studentName = "PARTH MAVANI";
 const studentTitle = "Information Technology Student & Aspiring Full-Stack Developer";
@@ -186,21 +214,23 @@ function App() {
     <div className="app">
       <NavBar toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
       
-      <Routes>
-        <Route 
-          path="/" 
-          element={<Home studentName={studentName} studentTitle={studentTitle} contactEmail={contactEmail} socialLinksData={socialLinksData} />} 
-        />
-        <Route 
-          path="/projects" 
-          element={<Projects skillsData={skillsData} />} 
-        />
-        <Route 
-          path="/contact" 
-          element={<Contact />} 
-        />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route 
+            path="/" 
+            element={<Home studentName={studentName} studentTitle={studentTitle} contactEmail={contactEmail} socialLinksData={socialLinksData} />} 
+          />
+          <Route 
+            path="/projects" 
+            element={<Projects skillsData={skillsData} />} 
+          />
+          <Route 
+            path="/contact" 
+            element={<Contact />} 
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </div>
   );
 }
