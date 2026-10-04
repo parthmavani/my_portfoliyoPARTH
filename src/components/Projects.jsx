@@ -3,7 +3,8 @@ import Spinner from './Spinner';
 import ErrorMessage from './ErrorMessage';
 import Skills from './Skills';
 import Toast from './Toast';
-import { getTasks, createTask, updateTask, deleteTask } from '../api';
+import Auth from './Auth';
+import { getTasks, createTask, updateTask, deleteTask, getMe } from '../api';
 import './Projects.css';
 
 function Projects({ skillsData }) {
@@ -16,6 +17,23 @@ function Projects({ skillsData }) {
   const [priority, setPriority] = useState('medium');
   
   const [toast, setToast] = useState(null);
+  const [user, setUser] = useState(null);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userEmail');
+    setUser(null);
+    setTasks([]);
+  };
+
+  const handleAuthError = (err) => {
+    if (err.message === 'Unauthorized') {
+      handleLogout();
+      showToast('Session expired. Please log in again.', 'error');
+    } else {
+      setError(err.message);
+    }
+  };
 
   const fetchAllTasks = () => {
     setLoading(true);
@@ -24,16 +42,24 @@ function Projects({ skillsData }) {
       .then((data) => {
         if (data.success) {
           setTasks(data.data);
-        } else {
-          throw new Error(data.message || 'Error fetching tasks');
         }
       })
-      .catch((err) => setError(err.message || 'Error fetching tasks'))
+      .catch(handleAuthError)
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
-    fetchAllTasks();
+    const token = localStorage.getItem('token');
+    if (token) {
+      getMe().then(data => {
+        setUser(data.user);
+        fetchAllTasks();
+      }).catch(() => {
+        handleLogout();
+      });
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const showToast = (message, type = 'success') => {
@@ -99,12 +125,24 @@ function Projects({ skillsData }) {
 
   return (
     <div className="projects-container">
-      <h2 className="projects-title">Task Manager (Practical 6)</h2>
+      <h2 className="projects-title">Task Manager (Practical 7)</h2>
       <p className="projects-subtitle">
-        Full-Stack Integration - React Frontend with Node/Express/MongoDB Backend
+        Full-Stack Integration - JWT Authentication & Input Validation
       </p>
 
-      <form onSubmit={handleCreateTask} className="task-form" style={{ marginBottom: '20px', padding: '15px', border: '1px solid #ccc', borderRadius: '8px' }}>
+      {!user ? (
+        <Auth onAuthSuccess={(userData) => {
+          setUser(userData);
+          fetchAllTasks();
+        }} />
+      ) : (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <p style={{ margin: 0 }}>Logged in as: <strong>{user.email}</strong></p>
+            <button onClick={handleLogout} style={{ padding: '8px 16px', background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Logout</button>
+          </div>
+
+          <form onSubmit={handleCreateTask} className="task-form" style={{ marginBottom: '20px', padding: '15px', border: '1px solid #ccc', borderRadius: '8px' }}>
         <h3>Create New Task</h3>
         <div style={{ marginBottom: '10px' }}>
           <input
@@ -173,6 +211,8 @@ function Projects({ skillsData }) {
 
       <h2 className="projects-title">Technical Skills & Expertise</h2>
       {skillsData && <Skills skills={skillsData} />}
+        </>
+      )}
 
       {toast && (
         <Toast
