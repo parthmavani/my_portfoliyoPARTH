@@ -9,20 +9,20 @@ function Footer({ email, socialLinks }) {
         <div className="footer-top">
           <div className="footer-brand">
             <span className="logo-icon">◈</span>
-            <span className="logo-text">Portfolio</span>
+            <span className="logo-text">Parth Mavani • TaskFlow</span>
           </div>
           <p className="footer-tagline">
-            Let's build something amazing together.
+            Information Technology (24IT050) • CSPIT, CHARUSAT University.
           </p>
         </div>
 
         <div className="footer-contact">
-          <h3 className="footer-heading">Get In Touch</h3>
+          <h3 className="footer-heading">Connect & Collaborate</h3>
           <a href={`mailto:${email}`} className="footer-email" id="contact-email">
             {email}
           </a>
           <div className="footer-socials" id="social-links">
-            {socialLinks.map((link) => (
+            {socialLinks && socialLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.url}
@@ -39,7 +39,7 @@ function Footer({ email, socialLinks }) {
 
         <div className="footer-bottom">
           <p className="copyright">
-            © {currentYear} All rights reserved. Built with React & Vite.
+            © {currentYear} Parth Mavani (24IT050). All rights reserved. Built with React, Express, MongoDB & Node.js.
           </p>
         </div>
       </div>

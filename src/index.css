@@ -1,31 +1,46 @@
 /* ═══════════════════════════════════════════════════════
-   Student Portfolio — Global Styles & Design Tokens
-   Light / White-Grey Theme
+   Task Manager & Portfolio — Global Styles & Design Tokens
    ═══════════════════════════════════════════════════════ */
-
-/* Font loaded via <link preload> in index.html for best performance */
-
 
 /* ─── Design Tokens ─── */
 :root {
   /* Colors — Base Light Theme */
-  --bg-primary:       #fafafa;
+  --bg-primary:       #f8fafc;
   --bg-secondary:     #ffffff;
   --bg-card:          #ffffff;
-  --border:           #e5e5e5;
-  --text-primary:     #0a0a0a;
-  --text-secondary:   #525252;
-  --text-muted:       #a3a3a3;
-  --accent:           #10b981;
-  --accent-secondary: #3b82f6;
+  --bg-card-hover:    #f1f5f9;
+  --border:           #e2e8f0;
+  --border-focus:     #6366f1;
+  --text-primary:     #0f172a;
+  --text-secondary:   #475569;
+  --text-muted:       #94a3b8;
+  
+  /* Brand Accents */
+  --accent:           #6366f1;
+  --accent-hover:     #4f46e5;
+  --accent-gradient:  linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+  --accent-soft:      rgba(99, 102, 241, 0.1);
 
-  /* Gradients */
-  --gradient-accent:  linear-gradient(135deg, #10b981, #3b82f6);
+  /* Semantic State Colors */
+  --priority-high:      #f43f5e;
+  --priority-high-bg:   rgba(244, 63, 94, 0.1);
+  --priority-med:       #f59e0b;
+  --priority-med-bg:    rgba(245, 158, 11, 0.1);
+  --priority-low:       #10b981;
+  --priority-low-bg:    rgba(16, 185, 129, 0.1);
+  --success:            #10b981;
+  --danger:             #ef4444;
 
-  /* Shadows */
-  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md:  0 4px 16px rgba(0, 0, 0, 0.15);
-  --shadow-lg:  0 8px 30px rgba(0, 0, 0, 0.2);
+  /* Elevation Shadows */
+  --shadow-sm:  0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md:  0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  --shadow-lg:  0 12px 28px -4px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+
+  /* Radius */
+  --radius-sm:  6px;
+  --radius-md:  12px;
+  --radius-lg:  18px;
+  --radius-full: 9999px;
 
   /* Typography */
   --font-body:    'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
@@ -33,17 +48,26 @@
 }
 
 body.dark-mode {
-  /* Colors — Modern Dark Theme */
-  --bg-primary:       #0a0a0a;
-  --bg-secondary:     #171717;
-  --bg-card:          #171717;
-  --border:           #262626;
-  --text-primary:     #fafafa;
-  --text-secondary:   #a3a3a3;
-  --text-muted:       #525252;
-  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md:  0 4px 16px rgba(0, 0, 0, 0.5);
-  --shadow-lg:  0 8px 30px rgba(0, 0, 0, 0.6);
+  /* Colors — Modern Sleek Dark Theme */
+  --bg-primary:       #0b0f19;
+  --bg-secondary:     #111827;
+  --bg-card:          #151e32;
+  --bg-card-hover:    #1c2844;
+  --border:           #24324f;
+  --border-focus:     #818cf8;
+  --text-primary:     #f8fafc;
+  --text-secondary:   #94a3b8;
+  --text-muted:       #64748b;
+
+  --accent-soft:      rgba(99, 102, 241, 0.2);
+
+  --priority-high-bg:   rgba(244, 63, 94, 0.2);
+  --priority-med-bg:    rgba(245, 158, 11, 0.2);
+  --priority-low-bg:    rgba(16, 185, 129, 0.2);
+
+  --shadow-sm:  0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md:  0 4px 14px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg:  0 12px 30px -4px rgba(0, 0, 0, 0.6);
 }
 
 /* ─── Reset & Base ─── */
@@ -66,6 +90,8 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
+  min-height: 100vh;
+  transition: background-color 0.25s ease, color 0.25s ease;
   overflow-x: hidden;
 }
 
@@ -79,18 +105,22 @@ img {
   display: block;
 }
 
-/* ─── App wrapper ─── */
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+/* ─── App Layout ─── */
 .app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-/* ─── Animations ─── */
+/* ─── Global Keyframe Animations ─── */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -101,7 +131,7 @@ img {
 @keyframes fadeInDown {
   from {
     opacity: 0;
-    transform: translateY(-16px);
+    transform: translateY(-12px);
   }
   to {
     opacity: 1;
@@ -109,31 +139,32 @@ img {
   }
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 0.4;
-    transform: translate(-50%, -50%) scale(1);
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
   }
-  50% {
-    opacity: 0.6;
-    transform: translate(-50%, -50%) scale(1.08);
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
-/* ─── Scrollbar ─── */
+/* ─── Modern Scrollbar ─── */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.35);
-  border-radius: 8px;
+  background: var(--border);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.55);
+  background: var(--text-muted);
 }
