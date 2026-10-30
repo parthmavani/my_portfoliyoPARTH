@@ -64,3 +64,19 @@ export const deleteTask = (id) =>
     if (res.status === 401) throw new Error('Unauthorized');
     return res.json();
   });
+
+
+// Practical 13: AI Integration (Calls backend endpoint securely)
+export const generateAiDescription = (title) =>
+  fetch(`${BASE_URL}/api/ai/generate-description`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ title })
+  }).then(async (res) => {
+    if (res.status === 401) throw new Error('Unauthorized');
+    const data = await res.json();
+    if (!res.ok && res.status !== 200) {
+      throw new Error(data.error || 'Failed to generate AI description');
+    }
+    return data;
+  });

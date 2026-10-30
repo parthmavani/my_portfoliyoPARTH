@@ -3,7 +3,7 @@ import Spinner from './Spinner';
 import ErrorMessage from './ErrorMessage';
 import Toast from './Toast';
 import Auth from './Auth';
-import { getTasks, createTask, updateTask, deleteTask, getMe } from '../api';
+import { getTasks, createTask, updateTask, deleteTask, getMe, generateAiDescription } from '../api';
 import './Projects.css';
 
 function Projects() {
@@ -16,6 +16,8 @@ function Projects() {
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('medium');
   const [submitting, setSubmitting] = useState(false);
+  const [generatingAI, setGeneratingAI] = useState(false);
+  const [aiNotice, setAiNotice] = useState(null);
 
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -113,6 +115,7 @@ function Projects() {
         setTitle('');
         setDescription('');
         setPriority('medium');
+        setAiNotice(null);
       } else {
         throw new Error(data.message || 'Failed to create task');
       }
@@ -121,6 +124,47 @@ function Projects() {
       showToast(err.message || 'Failed to create task', 'error');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // Practical 13: Generate Description and Priority with Gemini AI
+  const handleGenerateAIDescription = async () => {
+    if (!title.trim()) {
+      showToast('Please type a task title first so AI has context.', 'info');
+      return;
+    }
+
+    setGeneratingAI(true);
+    setAiNotice(null);
+
+    try {
+      const data = await generateAiDescription(title.trim());
+      if (data && data.success && data.description) {
+        setDescription(data.description);
+        if (data.suggestedPriority) {
+          setPriority(data.suggestedPriority);
+        }
+
+        if (data.fallback) {
+          setAiNotice({
+            type: 'fallback',
+            text: '⚡ Fallback Mode: Generated locally. Review or edit before saving.'
+          });
+          showToast('Offline AI fallback applied.', 'info');
+        } else {
+          setAiNotice({
+            type: 'ai',
+            text: `✨ Powered by Gemini AI: Suggested description & ${data.suggestedPriority || 'medium'} priority applied. Review before saving.`
+          });
+          showToast('AI description generated successfully!', 'success');
+        }
+      } else {
+        throw new Error(data.error || 'Failed to generate AI suggestion');
+      }
+    } catch (err) {
+      showToast(err.message || 'AI generation encountered an error', 'error');
+    } finally {
+      setGeneratingAI(false);
     }
   };
 
@@ -363,6 +407,33 @@ function Projects() {
                   onChange={(e) => setTitle(e.target.value)}
                   required
                 />
+              </div>
+
+              <div className="ai-assist-row">
+                <button
+                  type="button"
+                  className="ai-suggest-btn"
+                  onClick={handleGenerateAIDescription}
+                  disabled={generatingAI || !title.trim()}
+                  title="Generate task description and suggest priority with Gemini AI"
+                >
+                  {generatingAI ? (
+                    <>
+                      <span className="btn-spinner ai-spinner"></span>
+                      <span>Gemini Thinking...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="ai-sparkle">✨</span>
+                      <span>Auto-Generate with AI</span>
+                    </>
+                  )}
+                </button>
+                {aiNotice && (
+                  <span className={`ai-notice-badge ${aiNotice.type}`}>
+                    {aiNotice.text}
+                  </span>
+                )}
               </div>
 
               <div className="form-row">
